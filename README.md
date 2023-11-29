@@ -1,2 +1,3 @@
 # sppark-rust
-sppark rust package
+this is the rust package for
+https://github.com/supranational/sppark
