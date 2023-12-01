@@ -450,6 +450,8 @@ public:
                                    const scalar_t* scalars, bool mont = true,
                                    size_t ffi_affine_sz = sizeof(affine_t))
     {
+
+
         assert(this->npoints == 0 || npoints <= this->npoints);
 
         uint32_t lg_npoints = lg2(npoints + npoints/2);
@@ -464,6 +466,10 @@ public:
 
         out.inf();
         point_t p;
+
+        // printf("npoints %d, lg_npoints %d, wbits %d, batch %d \n", npoints, lg_npoints, wbits, batch);
+        // printf("stride %d\n", stride);
+        // return RustError{cudaSuccess};
 
         try {
             // |scalars| being nullptr means the scalars are pre-loaded to
@@ -512,12 +518,14 @@ public:
                     &d_digits[0][0], d_hist[0][0]
                 );
                 CUDA_OK(cudaGetLastError());
+                // printf("batch_addition sm %d, BATCH_ADD_BLOCK_SIZE %d\n", gpu.sm_count(), BATCH_ADD_BLOCK_SIZE);
 
                 gpu[i&1].launch_coop(accumulate<bucket_t, affine_h>,
                     {gpu.sm_count(), 0},
                     d_buckets, nwins, wbits, &d_points[d_off], d_digits, d_hist, i&1
                 );
                 gpu[i&1].record(ev);
+                // printf("accumulate MSM_NTHREADS %d\n", MSM_NTHREADS);
 
                 integrate<bucket_t><<<nwins, MSM_NTHREADS,
                                       sizeof(bucket_t)*MSM_NTHREADS/bucket_t::degree,
@@ -525,6 +533,7 @@ public:
                     d_buckets, nwins, wbits, scalar_t::bit_length()
                 );
                 CUDA_OK(cudaGetLastError());
+                // printf("integrate MSM_NTHREADS %d\n", MSM_NTHREADS);
 
                 if (i < batch-1) {
                     h_off += stride;
@@ -567,6 +576,7 @@ public:
 
         collect(p, res, ones);
         out.add(p);
+        // printf("collect MSM_NTHREADS %d\n", MSM_NTHREADS);
 
         return RustError{cudaSuccess};
     }
