@@ -1,3 +1,4 @@
 # sppark-rust
-this is the rust package for
+this repo is the rust package for
 https://github.com/supranational/sppark
+and support lowend cuda GPU.
