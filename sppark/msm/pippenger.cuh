@@ -24,6 +24,10 @@
 # define asm asm volatile
 #endif
 
+typedef std::chrono::high_resolution_clock Clock;
+
+using namespace std;
+
 /*
  * Break down |scalars| to signed |wbits|-wide digits.
  */
@@ -451,6 +455,9 @@ public:
                                    size_t ffi_affine_sz = sizeof(affine_t))
     {
 
+        //xiaoyu1998
+        // auto start = Clock::now();
+
 
         assert(this->npoints == 0 || npoints <= this->npoints);
 
@@ -577,6 +584,11 @@ public:
         collect(p, res, ones);
         out.add(p);
         // printf("collect MSM_NTHREADS %d\n", MSM_NTHREADS);
+
+        //xiaoyu1998
+        // auto end = Clock::now();
+        // uint64_t dt = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+        // printf("MSM size %ld took %ld us\n", npoints, dt);
 
         return RustError{cudaSuccess};
     }
